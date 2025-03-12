@@ -3,6 +3,7 @@
 # Variables
 CLUSTER_NAME="ullagallu-bapatlas-site"
 REGION="ap-south-1"
+PROFILE="default"
 ZONES="ap-south-1a,ap-south-1b"
 LOG_FILE="/tmp/eks_cluster_$(date +"%d-%m-%Y").log"
 
