@@ -2,9 +2,7 @@
 
 set -e
 print_message() {
-    echo "=================================================================="
     echo "$1"
-    echo "=================================================================="
 }
 
 print_message "Define all required variable"
@@ -26,7 +24,6 @@ print_message "Checking storage classes existed or not"
 for sc in expense instana; do
     if kubectl get sc "$sc" &>/dev/null; then
         echo "StorageClass $sc already exists. Skipping creation."
-        exit 0
     fi
 done
 
