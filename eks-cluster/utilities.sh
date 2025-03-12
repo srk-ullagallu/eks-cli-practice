@@ -6,8 +6,11 @@ print_message() {
 }
 
 print_message "Define all required variable"
+CLUSTER_NAME="eks-cli-prac"
 NODE_ROLE="eks-cli-prac-nodegroup-ng1"
 EBS_CSI_POLICY="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+ALB_INGRESS_POLICY="arn:aws:iam::522814728660:policy/AWSLoadBalancerControllerIAMPolicy"
+IAM_POLICY="AWSLoadBalancerControllerIAMPolicy"
 
 print_message "Create namespaces if not exist"
 for ns in expense-yaml instana-yaml; do
@@ -68,6 +71,49 @@ else
     print_message "EBS CSI Driver policy already attached. Skipping."
 fi
 
+
+print_message "----Installing/Upgrading AWS Load Balancer Controller----"
+
+# Add the EKS Helm repo if not already added
+if ! helm repo list | grep -q "eks"; then
+    helm repo add eks https://aws.github.io/eks-charts
+fi
+helm repo update
+
+# Check if the AWS Load Balancer Controller is already installed
+if helm list -n kube-system --filter "^aws-load-balancer-controller$" | grep -q "aws-load-balancer-controller"; then
+    print_message "AWS Load Balancer Controller is already installed. Upgrading..."
+else
+    print_message "AWS Load Balancer Controller is not installed. Installing..."
+fi
+
+# Install or upgrade the Helm release
+helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    --set clusterName=$CLUSTER_NAME \
+    --namespace kube-system \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=aws-load-balancer-controller
+
+print_message "----AWS Load Balancer Controller installation/upgrade complete.----"
+
+
+print_message "Ensuring AWS Load Balancer Controller IAM policy exists..."
+if ! aws iam get-policy --policy-arn $ALB_INGRESS_POLICY/$IAM_POLICY >/dev/null 2>&1; then
+    curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+    aws iam create-policy --policy-name $IAM_POLICY --policy-document file://iam-policy.json
+else
+    print_message "AWS Load Balancer Controller IAM policy already exists. Skipping."
+fi
+
+
+print_message "Creating IAM Service Account for AWS Load Balancer Controller..."
+eksctl create iamserviceaccount \
+    --cluster=$CLUSTER_NAME \
+    --region=$REGION \
+    --namespace=kube-system \
+    --name=aws-load-balancer-controller \
+    --attach-policy-arn=$ALB_INGRESS_POLICY/$IAM_POLICY \
+    --approve || true
 
 
 
