@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-CLUSTER_NAME="ullagallu-bapatlas-site"
+CLUSTER_NAME="eks-cli-prac"
 PROFILE="default"
 
 # Function to calculate elapsed time
