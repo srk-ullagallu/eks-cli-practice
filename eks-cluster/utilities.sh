@@ -73,12 +73,6 @@ else
     print_message "AWS Load Balancer Controller is not installed. Installing..."
 fi
 
-helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
-    --set clusterName=$CLUSTER_NAME \
-    --namespace kube-system \
-    --set serviceAccount.create=false \
-    --set serviceAccount.name=aws-load-balancer-controller
-
 print_message "Ensuring AWS Load Balancer Controller IAM policy exists..."
 EXISTING_POLICY_ARN=$(aws iam list-policies --scope Local --query "Policies[?PolicyName=='$IAM_POLICY'].Arn" --output text)
 
@@ -99,5 +93,22 @@ eksctl create iamserviceaccount \
     --name=aws-load-balancer-controller \
     --attach-policy-arn=$ALB_INGRESS_POLICY \
     --approve
+
+print_message "Waiting for Service Account to be available in Kubernetes..."
+sleep 20  # Add delay to allow time for Service Account to propagate
+
+print_message "Verifying Service Account in Kubernetes..."
+kubectl get sa aws-load-balancer-controller -n kube-system || {
+    echo "ERROR: Service Account not found! Exiting..."
+    exit 1
+}
+
+print_message "Installing/Upgrading AWS Load Balancer Controller..."
+helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    --set clusterName=$CLUSTER_NAME \
+    --namespace kube-system \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=aws-load-balancer-controller
+
 
 print_message "Script execution completed successfully."
