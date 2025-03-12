@@ -9,7 +9,7 @@ NODES=6
 NODES_MIN=1
 NODES_MAX=8
 NODE_VOLUME_SIZE=20
-SSH_PUBLIC_KEY="id_rsa"
+SSH_PUBLIC_KEY="~/.ssh/id_rsa.pub"
 PROFILE="default"
 
 
