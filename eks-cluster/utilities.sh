@@ -2,7 +2,7 @@
 
 set -e
 print_message() {
-    echo "$1"
+    echo "*****$1*****"
 }
 
 print_message "Define all required variable"
