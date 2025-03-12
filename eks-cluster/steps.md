@@ -4,3 +4,5 @@
 - configure in instance
 - install eksctl
 - install kubectl of eks compatible
+- install k9s
+- install kubens and kubectx
