@@ -38,7 +38,7 @@ eksctl create nodegroup --cluster=$CLUSTER_NAME \
                        --ssh-access \
                        --ssh-public-key=$SSH_PUBLIC_KEY \
                        --profile $PROFILE \
-                       --manage
+                       --managed
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create nodegroup."
     exit 1
