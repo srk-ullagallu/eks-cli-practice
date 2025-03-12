@@ -64,7 +64,7 @@ if [ -z "$NODE_ROLE_PREFIX" ] || [ "$NODE_ROLE_PREFIX" == "None" ]; then
 fi
 
 
-print_message "Ensuring EBS CSI Driver policy is attached to IAM Role $NODE_ROLE_PREFIX"..."
+print_message "Ensuring EBS CSI Driver policy is attached to IAM Role $NODE_ROLE_PREFIX..."
 if ! aws iam list-attached-role-policies --role-name "$NODE_ROLE_PREFIX" --query "AttachedPolicies[?PolicyArn=='$EBS_CSI_POLICY']" --output text | grep -q "$EBS_CSI_POLICY"; then
     aws iam attach-role-policy --role-name "$NODE_ROLE_PREFIX" --policy-arn "$EBS_CSI_POLICY"
 else
