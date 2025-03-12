@@ -5,7 +5,6 @@ CLUSTER_NAME="ullagallu-bapatlas-site"
 REGION="ap-south-1"
 PROFILE="default"
 ZONES="ap-south-1a,ap-south-1b"
-LOG_FILE="/tmp/eks_cluster_$(date +"%d-%m-%Y").log"
 
 # Function to calculate elapsed time
 elapsed_time() {
@@ -14,33 +13,32 @@ elapsed_time() {
     local elapsed=$(( end - start ))
     local minutes=$(( elapsed / 60 ))
     local seconds=$(( elapsed % 60 ))
-    printf "Elapsed time: %d minutes and %d seconds\n" $minutes $seconds | tee -a "$LOG_FILE"
+    printf "Elapsed time: %d minutes and %d seconds\n" $minutes $seconds
 }
 
 # Start timer
 start_time=$(date +%s)
 
-# Create EKS cluster
-echo "Creating EKS cluster..." | tee -a "$LOG_FILE"
+# Create EKS cluster"
 eksctl create cluster --name $CLUSTER_NAME \
                       --region $REGION \
                       --zones $ZONES \
                       --profile $PROFILE \
-                      --without-nodegroup &>>"$LOG_FILE"
+                      --without-nodegroup
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to create EKS cluster." | tee -a "$LOG_FILE"
+    echo "Error: Failed to create EKS cluster." 
     exit 1
 fi
 
 # Associate IAM OIDC provider
-echo "Associating IAM OIDC provider..." | tee -a "$LOG_FILE"
+echo "Associating IAM OIDC provider..."
 eksctl utils associate-iam-oidc-provider \
     --region $REGION \
     --cluster $CLUSTER_NAME \
     --profile $PROFILE \
     --approve &>>"$LOG_FILE"
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to associate IAM OIDC provider." | tee -a "$LOG_FILE"
+    echo "Error: Failed to associate IAM OIDC provider."
     exit 1
 fi
 
