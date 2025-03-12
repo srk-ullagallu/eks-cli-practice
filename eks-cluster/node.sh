@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-CLUSTER_NAME="ullagallu-bapatlas-site"
+CLUSTER_NAME="eks-cli-prac"
 REGION="ap-south-1"
 NODEGROUP_NAME="ng1"
 NODE_TYPE="t3a.medium"
@@ -38,10 +38,7 @@ eksctl create nodegroup --cluster=$CLUSTER_NAME \
                        --ssh-access \
                        --ssh-public-key=$SSH_PUBLIC_KEY \
                        --profile $PROFILE \
-                       --managed \
-                       --asg-access \
-                       --external-dns-access \
-                       --spot
+                       --manage
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create nodegroup."
     exit 1
