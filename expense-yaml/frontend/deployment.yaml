@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+    project: expense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+      project: expense
+  template:
+    metadata:
+      labels:
+        app: frontend
+        project: expense
+    spec:
+      containers:
+        - name: frontend
+          image: siva9666/expense-frontend:node
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 500Mi
+              cpu: 100m
+            limits:
+              memory: 600Mi
+              cpu: 200m
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: frontend-config

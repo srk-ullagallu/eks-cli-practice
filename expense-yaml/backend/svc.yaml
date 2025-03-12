@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+    project: expense
+spec:
+  selector:
+    app: backend
+    project: expense
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
