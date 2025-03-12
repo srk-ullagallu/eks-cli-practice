@@ -92,7 +92,7 @@ eksctl create iamserviceaccount \
     --namespace=kube-system \
     --name=aws-load-balancer-controller \
     --attach-policy-arn=$ALB_INGRESS_POLICY \
-    --approve
+    --approve || true
 
 print_message "Waiting for Service Account to be available in Kubernetes..."
 sleep 20  # Add delay to allow time for Service Account to propagate
