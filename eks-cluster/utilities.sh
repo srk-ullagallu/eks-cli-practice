@@ -5,7 +5,7 @@ print_message() { echo "***** $1 *****"; }
 
 print_message "Defining required variables..."
 CLUSTER_NAME="eks-cli-prac"
-NODE_ROLE="eks-cli-prac-nodegroup-ng1"
+NODE_ROLE="eks-cli-prac-ng1"
 EBS_CSI_POLICY="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 IAM_POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
 REGION="ap-south-1"
