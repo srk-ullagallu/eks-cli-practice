@@ -5,7 +5,7 @@ print_message() { echo "***** $1 *****"; }
 
 print_message "Defining required variables..."
 CLUSTER_NAME="eks-cli-prac"
-NODE_ROLE="eksctl-eks-cli-prac-nodegroup-ng1"
+NODE_ROLE="eksctl-eks-cli-prac-nodegroup-ng1-NodeInstanceRole"
 EBS_CSI_POLICY="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 IAM_POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
 REGION="ap-south-1"
@@ -51,6 +51,7 @@ fi
 
 print_message "Verifying Node Role existence..."
 NODE_ROLE_PREFIX=$(aws iam list-roles --query "Roles[?RoleName=='$NODE_ROLE'].RoleName" --output text)
+
 if [ -z "$NODE_ROLE_PREFIX" ] || [ "$NODE_ROLE_PREFIX" == "None" ]; then
     print_message "No IAM role found with name $NODE_ROLE. Exiting."
     exit 1
