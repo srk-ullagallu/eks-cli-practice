@@ -15,6 +15,7 @@ spec:
     metadata:
       labels:
         app: catalogue
+        tier: backend
     spec:
       containers:
         - name: catalogue
