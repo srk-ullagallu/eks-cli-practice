@@ -1,6 +1,4 @@
 #!/bin/bash
-set -x  # Enable debug mode
-
 print_message() { echo "***** $1 *****"; }
 
 print_message "Defining required variables..."
