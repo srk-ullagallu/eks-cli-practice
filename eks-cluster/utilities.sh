@@ -50,8 +50,7 @@ else
 fi
 
 print_message "Verifying Node Role existence..."
-NODE_ROLE_PREFIX=$(aws iam list-roles --query "Roles[?RoleName=='$NODE_ROLE'].RoleName" --output text)
-
+NODE_ROLE_PREFIX=$(aws iam list-roles --query "Roles[?starts_with(RoleName, '$NODE_ROLE')].RoleName" --output text)
 if [ -z "$NODE_ROLE_PREFIX" ] || [ "$NODE_ROLE_PREFIX" == "None" ]; then
     print_message "No IAM role found with name $NODE_ROLE. Exiting."
     exit 1
