@@ -36,7 +36,7 @@ eksctl utils associate-iam-oidc-provider \
     --region $REGION \
     --cluster $CLUSTER_NAME \
     --profile $PROFILE \
-    --approve &>>"$LOG_FILE"
+    --approve
 if [ $? -ne 0 ]; then
     echo "Error: Failed to associate IAM OIDC provider."
     exit 1
