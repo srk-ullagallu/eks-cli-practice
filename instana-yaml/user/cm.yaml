@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-config
+  labels:
+    project: instana
+    tier: user-backend
+data:
+  MONGO: "true"
+  MONGO_URL: "mongodb://mongo:27017/catalogue"
+  REDIS_HOST: "redis"
