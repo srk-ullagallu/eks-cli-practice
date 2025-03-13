@@ -6,15 +6,20 @@
             "Action": [
                 "route53:ChangeResourceRecordSets"
             ],
-            "Resource": "arn:aws:route53::: bapatlas.site/*"
+            "Resource": [
+                "arn:aws:route53:::hostedzone/Z04410211MZ57SQOXFNI3"
+            ]
         },
         {
             "Effect": "Allow",
             "Action": [
                 "route53:ListHostedZones",
-                "route53:ListResourceRecordSets"
+                "route53:ListResourceRecordSets",
+                "route53:ListTagsForResource"
             ],
-            "Resource": "*"
+            "Resource": [
+                "*"
+            ]
         }
     ]
 }

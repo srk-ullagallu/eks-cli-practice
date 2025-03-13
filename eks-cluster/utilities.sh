@@ -1,100 +1,76 @@
 #!/bin/bash
 
 set -e
-print_message() {
-    echo "*****$1*****"
-}
-
-print_message "Define all required variables"
-CLUSTER_NAME="eks-cli-prac"
-NODE_ROLE="eks-cli-prac-nodegroup-ng1"
-EBS_CSI_POLICY="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-IAM_POLICY="AWSLoadBalancerControllerIAMPolicy"
-AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-ALB_INGRESS_POLICY="arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY"
-REGION="ap-south-1"
-IAM_POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
-AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-ALB_INGRESS_POLICY="arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY_NAME"
-
-print_message "Checking if Metrics Server is already installed..."
-if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
-    print_message "Applying the Metrics Server manifest file..."
-    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-else
-    print_message "Metrics Server is already installed. Skipping apply."
-fi
-
-
-print_message "Create namespaces if not exist"
-for ns in expense-yaml instana-yaml; do
-    kubectl get ns "$ns" &>/dev/null || kubectl create ns "$ns"
-done
-
-print_message "Checking storage classes existence"
-for sc in expense instana; do
-    kubectl get sc "$sc" &>/dev/null || echo "StorageClass $sc does not exist. Proceeding..."
-done
-
-print_message "Checking volumes folder and applying storage classes"
-if [ -d "../volumes" ]; then
-    kubectl apply -f ../volumes
-else
-    echo "Error: Directory '../volumes' not found!" >&2
-    exit 1
-fi
-
-print_message "Checking for Helm release: aws-ebs-csi-driver"
-if ! helm list -n kube-system --filter "^aws-ebs-csi-driver$" | grep -q "aws-ebs-csi-driver"; then
-    print_message "Installing EBS CSI driver..."
-    helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
-    helm repo update
-    helm upgrade --install aws-ebs-csi-driver \
-        --namespace kube-system \
-        aws-ebs-csi-driver/aws-ebs-csi-driver
-else
-    print_message "EBS CSI driver is already installed."
-fi
-
-print_message "Querying for node instance role"
-NODE_ROLE_PREFIX=$(aws iam list-roles --query "Roles[?contains(RoleName, '$NODE_ROLE')].RoleName" --output text)
-
-print_message "Checking if Node Role exists"
-if [ -z "$NODE_ROLE_PREFIX" ] || [ "$NODE_ROLE_PREFIX" == "None" ]; then
-    print_message "No IAM role found with prefix $NODE_ROLE_PREFIX. Exiting."
-    exit 1
-fi
-
-#!/bin/bash
-
-set -e
 
 print_message() {
     echo "***** $1 *****"
 }
 
+print_message "Defining required variables..."
 CLUSTER_NAME="eks-cli-prac"
-REGION="ap-south-1"
-AWS_ACCOUNT_ID=522814728660
+NODE_ROLE="eks-cli-prac-nodegroup-ng1"
+EBS_CSI_POLICY="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 IAM_POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
+REGION="ap-south-1"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 ALB_INGRESS_POLICY="arn:aws:iam::$AWS_ACCOUNT_ID:policy/$IAM_POLICY_NAME"
 
-# 1. Add Helm Repo if not exists
-print_message "Checking if Helm repository 'eks' is already added..."
+print_message "Checking if Metrics Server is already installed..."
+if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
+    print_message "Applying the Metrics Server manifest..."
+    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+else
+    print_message "Metrics Server is already installed. Skipping."
+fi
+
+print_message "Creating required namespaces if they don't exist..."
+for ns in expense-yaml instana-yaml; do
+    kubectl get ns "$ns" &>/dev/null || kubectl create ns "$ns"
+done
+
+print_message "Checking StorageClass existence..."
+for sc in expense instana; do
+    if ! kubectl get sc "$sc" &>/dev/null; then
+        print_message "StorageClass $sc does not exist. Please create it if necessary."
+    fi
+done
+
+print_message "Applying storage classes from volumes directory..."
+if [ -d "../volumes" ]; then
+    kubectl apply -f ../volumes
+else
+    print_message "Error: Directory '../volumes' not found!" >&2
+    exit 1
+fi
+
+print_message "Checking and installing AWS EBS CSI Driver via Helm..."
+if ! helm list -n kube-system --filter "^aws-ebs-csi-driver$" | grep -q "aws-ebs-csi-driver"; then
+    helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+    helm repo update
+    helm upgrade --install aws-ebs-csi-driver --namespace kube-system aws-ebs-csi-driver/aws-ebs-csi-driver
+else
+    print_message "EBS CSI driver is already installed."
+fi
+
+print_message "Verifying Node Role existence..."
+NODE_ROLE_PREFIX=$(aws iam list-roles --query "Roles[?RoleName=='$NODE_ROLE'].RoleName" --output text)
+if [ -z "$NODE_ROLE_PREFIX" ] || [ "$NODE_ROLE_PREFIX" == "None" ]; then
+    print_message "No IAM role found with name $NODE_ROLE. Exiting."
+    exit 1
+fi
+
+print_message "Checking and adding Helm repository 'eks'..."
 if ! helm repo list | grep -q "eks"; then
     helm repo add eks https://aws.github.io/eks-charts
     helm repo update
 else
-    print_message "Helm repository 'eks' already exists. Skipping add."
+    print_message "Helm repository 'eks' already exists."
 fi
 
-# 2. Check if AWS Load Balancer Controller is installed
-print_message "Checking if AWS Load Balancer Controller is installed..."
+print_message "Installing or updating AWS Load Balancer Controller..."
 if helm list -n kube-system --filter "^aws-load-balancer-controller$" | grep -q "aws-load-balancer-controller"; then
-    print_message "AWS Load Balancer Controller is already installed. Skipping installation."
+    print_message "AWS Load Balancer Controller is already installed. Skipping."
 else
-    print_message "Installing AWS Load Balancer Controller..."
     helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
         --set clusterName=$CLUSTER_NAME \
         -n kube-system \
@@ -102,22 +78,23 @@ else
         --set serviceAccount.name=aws-load-balancer-controller
 fi
 
-# 3. Check if IAM policy exists before creating it
-print_message "Checking if IAM policy '$IAM_POLICY_NAME' exists..."
+print_message "Checking IAM policy existence: $IAM_POLICY_NAME..."
 EXISTING_POLICY_ARN=$(aws iam list-policies --scope Local --query "Policies[?PolicyName=='$IAM_POLICY_NAME'].Arn" --output text)
-
 if [ -z "$EXISTING_POLICY_ARN" ] || [ "$EXISTING_POLICY_ARN" == "None" ]; then
-    print_message "Creating IAM policy '$IAM_POLICY_NAME'..."
-    curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
-    aws iam create-policy --policy-name "$IAM_POLICY_NAME" --policy-document file://iam-policy.json
+    print_message "Creating IAM policy: $IAM_POLICY_NAME..."
+    POLICY_FILE="iam-policy.json"
+    if [ ! -f "$POLICY_FILE" ]; then
+        curl -o "$POLICY_FILE" https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+    fi
+    aws iam create-policy --policy-name "$IAM_POLICY_NAME" --policy-document file://"$POLICY_FILE"
+    rm -f "$POLICY_FILE"
 else
-    print_message "IAM policy '$IAM_POLICY_NAME' already exists. Skipping creation."
+    print_message "IAM policy $IAM_POLICY_NAME already exists."
 fi
 
-# 4. Create IAM Service Account if not exists
-print_message "Checking if IAM Service Account for AWS Load Balancer Controller exists..."
+print_message "Checking IAM Service Account for AWS Load Balancer Controller..."
 if eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --name=aws-load-balancer-controller --namespace=kube-system >/dev/null 2>&1; then
-    print_message "IAM Service Account already exists. Skipping creation."
+    print_message "IAM Service Account already exists. Skipping."
 else
     print_message "Creating IAM Service Account for AWS Load Balancer Controller..."
     eksctl create iamserviceaccount \
@@ -127,4 +104,38 @@ else
         --attach-policy-arn=$ALB_INGRESS_POLICY \
         --approve
 fi
+
+print_message "Setting up ExternalDNS IAM policy and Helm deployment..."
+DNS_POLICY_NAME="ExternalDNSPolicy"
+DNS_POLICY_ARN="arn:aws:iam::$AWS_ACCOUNT_ID:policy/$DNS_POLICY_NAME"
+
+if aws iam list-policies --scope Local --query "Policies[?PolicyName=='$DNS_POLICY_NAME'].Arn" --output text | grep -q "$DNS_POLICY_NAME"; then
+    print_message "IAM Policy $DNS_POLICY_NAME already exists."
+else
+    print_message "Creating IAM Policy $DNS_POLICY_NAME..."
+    curl -o dns-policy.json https://raw.githubusercontent.com/kubernetes-sigs/external-dns/master/docs/tutorials/aws-iam-policy.json
+    aws iam create-policy --policy-name $DNS_POLICY_NAME --policy-document file://dns-policy.json
+    rm -f dns-policy.json
+fi
+
+print_message "Checking and creating ExternalDNS IAM Service Account..."
+if eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --name=external-dns --namespace=kube-system >/dev/null 2>&1; then
+    print_message "IAM Service Account for ExternalDNS already exists. Skipping."
+else
+    eksctl create iamserviceaccount \
+        --name external-dns \
+        --namespace kube-system \
+        --cluster $CLUSTER_NAME \
+        --attach-policy-arn $DNS_POLICY_ARN \
+        --approve
+fi
+
+print_message "Installing or upgrading ExternalDNS via Helm..."
+helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+helm repo update
+helm upgrade --install external-dns external-dns/external-dns \
+  --namespace kube-system \
+  --set serviceAccount.name=external-dns \
+  --set serviceAccount.create=false
+
 print_message "Script execution completed successfully."
