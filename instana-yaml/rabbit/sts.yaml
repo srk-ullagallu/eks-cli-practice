@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbit
+  labels:
+    project: instana
+    tier: queue-db
+spec:
+  serviceName: "rabbit"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbit
+      tier: queue-db
+  template:
+    metadata:
+      labels:
+        app: rabbit
+        tier: queue-db
+    spec:
+      containers:
+        - name: rabbit
+          image: siva9666/rabbit-instana:v1
+          ports:
+            - containerPort: 5672
+              name: amqp
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 800m
+            limits:
+              memory: 2Gi
+              cpu: 1000m
+          livenessProbe:
+            exec:
+              command:
+                - "rabbitmq-diagnostics"
+                - "-q"
+                - "ping"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - "rabbitmq-diagnostics"
+                - "-q"
+                - "ping"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 3
+
+          volumeMounts:
+            - name: rabbit-storage
+              mountPath: /var/lib/rabbitmq
+  volumeClaimTemplates:
+    - metadata:
+        name: rabbit-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: instana

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  labels:
+    project: instana
+spec:
+  serviceName: "redis"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      tier: cache-db
+  template:
+    metadata:
+      labels:
+        app: redis
+        project: instana
+        tier: cache-db
+    spec:
+      containers:
+      - name: redis
+        image: siva9666/redis-instana:v1
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        resources:
+            requests:
+              memory: 200Mi
+              cpu: 50m
+            limits:
+              memory: 300Mi
+              cpu: 100m
+        livenessProbe:
+          exec:
+            command:
+              - "redis-cli"
+              - "-p"
+              - "7000"
+              - "ping"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          exec:
+            command:
+              - "redis-cli"
+              - "-p"
+              - "7000"
+              - "ping"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+      labels:
+        project: instana
+        tier: cache
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: instana
+      resources:
+        requests:
+          storage: 1Gi
