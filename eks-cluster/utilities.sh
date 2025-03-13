@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 print_message() {
     echo "***** $1 *****"
 }
