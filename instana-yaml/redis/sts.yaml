@@ -39,7 +39,7 @@ spec:
             command:
               - "redis-cli"
               - "-p"
-              - "7000"
+              - "6379 "
               - "ping"
           initialDelaySeconds: 30
           periodSeconds: 30
@@ -51,7 +51,7 @@ spec:
             command:
               - "redis-cli"
               - "-p"
-              - "7000"
+              - "6379 "
               - "ping"
           initialDelaySeconds: 30
           periodSeconds: 30
