@@ -16,6 +16,7 @@ REGION="ap-south-1"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 ALB_INGRESS_POLICY_ARN="arn:aws:iam::522814728660:policy/AWSLoadBalancerControllerIAMPolicy"
 DNS_POLICY_ARN="arn:aws:iam::522814728660:policy/ExternalDNSPolicy"
+PROFILE="default"
 
 package_installtion "Checking if Metrics Server is already installed..."
 if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
@@ -91,6 +92,7 @@ else
         --namespace=kube-system \
         --name=aws-load-balancer-controller \
         --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
+        --profile $PROFILE \
         --approve
 fi
 
@@ -112,5 +114,6 @@ else
         --namespace kube-system \
         --cluster $CLUSTER_NAME \
         --attach-policy-arn $DNS_POLICY_ARN \
+        --profile $PROFILE \
         --approve
 fi
