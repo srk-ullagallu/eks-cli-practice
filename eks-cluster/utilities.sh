@@ -9,14 +9,14 @@ package_installation() {
 }
 
 package_installation "Defining required variables..."
-CLUSTER_NAME="eks-cli-prac"
-NODE_ROLE="eksctl-eks-cli-prac-nodegroup-ng1-NodeInstanceRole"
-EBS_CSI_POLICY_ARN="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-ALB_INGRESS_POLICY_ARN="arn:aws:iam::522814728660:policy/AWSLoadBalancerControllerIAMPolicy"
-DNS_POLICY_ARN="arn:aws:iam::522814728660:policy/ExternalDNSPolicy"
-REGION="ap-south-1"
+CLUSTER_NAME=eks-cli-prac
+NODE_ROLE=eksctl-eks-cli-prac-nodegroup-ng1-NodeInstanceRole
+EBS_CSI_POLICY_ARN=arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+ALB_INGRESS_POLICY_ARN=arn:aws:iam::522814728660:policy/AWSLoadBalancerControllerIAMPolicy
+DNS_POLICY_ARN=arn:aws:iam::522814728660:policy/ExternalDNSPolicy
+REGION=ap-south-1
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-PROFILE="default"
+PROFILE=default
 
 package_installation "Checking if Metrics Server is already installed..."
 if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
