@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shipping-config
+  labels:
+    project: instana
+    tier: shipping-backend
+data:
+  DB_HOST: "mysql"
+  DB_PORT: "3306"
+  CART_ENDPOINT: "cart:8080"

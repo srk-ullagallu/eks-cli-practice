@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping
+  labels:
+    project: instana
+    tier: shipping-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shipping
+  template:
+    metadata:
+      labels:
+        tier: shipping-backend
+    spec:
+      containers:
+        - name: shipping
+          image: siva9666/shipping-instana:monitoring-v1
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: 800m
+            limits:
+              memory: "2Gi"
+              cpu: 1000m
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5      
+            periodSeconds: 10           
+            timeoutSeconds: 2           
+            successThreshold: 1
+            failureThreshold: 3          
+          livenessProbe:
+            httpGet:
+              path: /health             
+              port: 8080
+            initialDelaySeconds: 20    
+            periodSeconds: 10          
+            timeoutSeconds: 2            
+            successThreshold: 1      
+            failureThreshold: 3
+          envFrom:
+            - configMapRef:
+                name: shipping-config
+            - secretRef:
+                name: shipping-secrets
