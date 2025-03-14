@@ -4,7 +4,7 @@
 print_message() { 
     echo  $1; }
 package_installtion() { 
-    echo "--------$1-----------";
+    echo "*******$1******";
 }
 
 package_installtion "Defining required variables..."
@@ -71,17 +71,6 @@ else
     fi
 fi
 
-package_installtion "Installing or updating AWS Load Balancer Controller..."
-if helm list -n kube-system --filter "^aws-load-balancer-controller$" | grep -q "aws-load-balancer-controller"; then
-    print_message "AWS Load Balancer Controller is already installed. Skipping."
-else
-    helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-        --set clusterName=$CLUSTER_NAME \
-        -n kube-system \
-        --set serviceAccount.create=false \
-        --set serviceAccount.name=aws-load-balancer-controller
-fi
-
 package_installtion "Checking IAM Service Account for AWS Load Balancer Controller..."
 if eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --name=aws-load-balancer-controller --namespace=kube-system >/dev/null 2>&1; then
     print_message "IAM Service Account already exists. Skipping."
@@ -92,18 +81,20 @@ else
         --namespace=kube-system \
         --name=aws-load-balancer-controller \
         --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
-        --profile $PROFILE \
         --approve
 fi
 
-print_message "Installing or upgrading ExternalDNS via Helm..."
-helm upgrade --install external-dns external-dns/external-dns \
-  --namespace kube-system \
-  --set serviceAccount.name=external-dns \
-  --set serviceAccount.create=false
-
-print_message "Script execution completed successfully."
-
+package_installtion "Installing or updating AWS Load Balancer Controller..."
+if helm status aws-load-balancer-controller -n kube-system >/dev/null 2>&1; then
+    print_message "AWS Load Balancer Controller is already installed. Skipping."
+else
+    helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+        --set clusterName=$CLUSTER_NAME \
+        -n kube-system \
+        --set serviceAccount.create=false \
+        --set serviceAccount.name=aws-load-balancer-controller
+    sleep 10  # Wait for webhook initialization
+fi
 
 package_installtion "Checking and creating ExternalDNS IAM Service Account..."
 if eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --name=external-dns --namespace=kube-system >/dev/null 2>&1; then
@@ -114,6 +105,13 @@ else
         --namespace kube-system \
         --cluster $CLUSTER_NAME \
         --attach-policy-arn $DNS_POLICY_ARN \
-        --profile $PROFILE \
         --approve
 fi
+
+print_message "Installing or upgrading ExternalDNS via Helm..."
+helm upgrade --install external-dns external-dns/external-dns \
+  --namespace kube-system \
+  --set serviceAccount.name=external-dns \
+  --set serviceAccount.create=false
+
+print_message "Script execution completed successfully."
