@@ -55,3 +55,4 @@ spec:
 # - cross check the secrets and cm mounted well
 # - check the probes are successfully executed
 # - some times probes also casuses the issues becase initial delay seconds less no of seconds for health check start
+# - mismatch the deployment and service  

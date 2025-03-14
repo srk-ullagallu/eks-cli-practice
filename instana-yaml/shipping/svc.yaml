@@ -7,7 +7,7 @@ metadata:
     tier: shipping-backend
 spec:
   selector:
-    app: shipping
+    tier: shipping-backend
   ports:
     - port: 8080
       targetPort: 8080
