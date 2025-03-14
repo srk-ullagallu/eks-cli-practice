@@ -1,7 +1,7 @@
 #!/bin/bash
 
 print_message() { 
-    echo "$1"
+    echo "--> $1"
 }
 
 package_installation() { 
@@ -88,7 +88,10 @@ else
         --namespace kube-system \
         --set serviceAccount.create=false \
         --set serviceAccount.name=aws-load-balancer-controller || { print_message "Failed to install AWS Load Balancer Controller"; exit 1; }
-    sleep 10  # Wait for webhook initialization
+    
+    # Wait for the AWS Load Balancer Controller pods to be ready
+    print_message "Waiting for AWS Load Balancer Controller pods to be ready..."
+    kubectl wait --for=condition=ready pod -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller --timeout=300s || { print_message "AWS Load Balancer Controller pods are not ready"; exit 1; }
 fi
 
 package_installation "Checking and creating ExternalDNS IAM Service Account..."
