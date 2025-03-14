@@ -91,7 +91,7 @@ if helm status aws-load-balancer-controller -n kube-system >/dev/null 2>&1; then
 else
     helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
         --set clusterName=$CLUSTER_NAME \
-        -n kube-system \
+        --namespace kube-system\
         --set serviceAccount.create=false \
         --set serviceAccount.name=aws-load-balancer-controller
     sleep 10  # Wait for webhook initialization
@@ -104,7 +104,6 @@ else
     eksctl create iamserviceaccount \
         --name=external-dns \
         --namespace=kube-system \
-        --region=$REGION \ 
         --cluster=$CLUSTER_NAME \
         --attach-policy-arn=$DNS_POLICY_ARN \
         --approve
