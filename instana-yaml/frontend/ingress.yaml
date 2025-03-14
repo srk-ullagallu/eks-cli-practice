@@ -26,14 +26,14 @@ spec:
     - host: instana-dev.bapatlas.site
       http:
         paths:
-          # Redirect HTTP to HTTPS
+          # Redirect HTTP to HTTPS (Fixed reference)
           - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: ssl-redirect
+                name: use-annotation
                 port:
-                  name: use-annotation
+                  name: ssl-redirect
 
           # Forward traffic to frontend
           - path: "/"

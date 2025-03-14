@@ -55,4 +55,6 @@ spec:
 # - cross check the secrets and cm mounted well
 # - check the probes are successfully executed
 # - some times probes also casuses the issues becase initial delay seconds less no of seconds for health check start
-# - mismatch the deployment and service  
+# - mismatch the deployment and service
+# after deploying application as a pod in k8s first describe the pod wheather it is pod started or not any failures like probes or config or secrets are not mounted
+# If everything is good pod running successfully then after checks logs for any failures of applications
