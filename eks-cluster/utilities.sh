@@ -77,12 +77,12 @@ if eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --name=aws-load-balancer
 else
     print_message "Creating IAM Service Account for AWS Load Balancer Controller..."
     eksctl create iamserviceaccount \
-        --cluster=$CLUSTER_NAME \
-        --namespace=kube-system \
-        --region=$REGION \
-        --name=aws-load-balancer-controller \
-        --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
-        --approve
+    --cluster=$CLUSTER_NAME \
+    --namespace=kube-system \
+    --name=aws-load-balancer-controller \
+    --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
+    --approve \
+    --override-existing-serviceaccounts
 fi
 
 package_installtion "Installing or updating AWS Load Balancer Controller..."
@@ -106,7 +106,8 @@ else
         --namespace=kube-system \
         --cluster=$CLUSTER_NAME \
         --attach-policy-arn=$DNS_POLICY_ARN \
-        --approve
+        --approve \
+        --override-existing-serviceaccounts
 fi
 
 print_message "Installing or upgrading ExternalDNS via Helm..."
