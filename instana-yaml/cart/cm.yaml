@@ -8,4 +8,4 @@ metadata:
 data:
   CATALOGUE_HOST: "catalogue"
   CATALOGUE_PORT: "8080"
-  REDIS_HOST: "redis-headless"
+  REDIS_HOST: "redis"
