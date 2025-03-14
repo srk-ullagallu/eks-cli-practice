@@ -9,7 +9,7 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: shipping
+      tier: shipping-backend
   template:
     metadata:
       labels:
