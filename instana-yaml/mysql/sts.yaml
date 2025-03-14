@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: siva9666/mysql-instana:v1
+          image: 522814728660.dkr.ecr.ap-south-1.amazonaws.com/instana/mysql:v1
           ports:
             - containerPort: 3306
               name: mysql

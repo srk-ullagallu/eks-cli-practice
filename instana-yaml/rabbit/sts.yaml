@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: rabbit
-          image: siva9666/rabbit-instana:v1
+          image: 522814728660.dkr.ecr.ap-south-1.amazonaws.com/instana/rabbit:v1
           ports:
             - containerPort: 5672
               name: amqp

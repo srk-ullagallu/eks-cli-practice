@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: mongo
-          image: siva9666/mongo-instana:monitoring-v1
+          image: 522814728660.dkr.ecr.ap-south-1.amazonaws.com/instana/mongo:v1
           ports:
             - containerPort: 27017
               name: mongo

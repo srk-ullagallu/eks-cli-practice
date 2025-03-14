@@ -4,7 +4,8 @@ metadata:
   name: cart
   labels:
     project: instana
-    tier: backend-cart
+    tier: backend
+    app: cart
 spec:
   replicas: 2
   selector:
@@ -19,7 +20,7 @@ spec:
     spec:
       containers:
         - name: cart
-          image: siva9666/cart-instana:monitoring-v1
+          image: 522814728660.dkr.ecr.ap-south-1.amazonaws.com/instana/cart:v1
           ports:
             - containerPort: 8080
           resources:

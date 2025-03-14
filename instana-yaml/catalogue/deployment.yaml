@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: catalogue
-          image: siva9666/catalogue-instana:monitoring-v1
+          image: 522814728660.dkr.ecr.ap-south-1.amazonaws.com/instana/catalogue:v1
           ports:
             - containerPort: 8080
           resources:

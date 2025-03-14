@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: siva9666/web-instana:monitoring-v2
+        image: 522814728660.dkr.ecr.ap-south-1.amazonaws.com/instana/frontend:v1
         ports:
         - containerPort: 80
         resources:
