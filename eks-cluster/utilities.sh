@@ -16,7 +16,7 @@ ALB_INGRESS_POLICY_ARN="arn:aws:iam::522814728660:policy/AWSLoadBalancerControll
 DNS_POLICY_ARN="arn:aws:iam::522814728660:policy/ExternalDNSPolicy"
 REGION="ap-south-1"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-PROFILE="default"
+ECR_ARN="arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 
 package_installation "Checking if Metrics Server is already installed..."
 if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
@@ -62,11 +62,9 @@ if [ -z "$NODE_ROLE" ] || [ "$NODE_ROLE" == "None" ]; then
 else
     print_message "Node Role found: $NODE_ROLE. Attaching policy..."
     aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$EBS_CSI_POLICY_ARN" || { print_message "Failed to attach policy"; exit 1; }
-    print_message "Policy attached successfully."
+    aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$ECR_ARN" || { print_message "Failed to attach policy"; exit 1; }
+    print_message "Policys attached successfully."
 fi
-
-
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller --set clusterName=$CLUSTER_NAME -n kube-system --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
 
 eksctl create iamserviceaccount \
 --cluster=$CLUSTER_NAME \
@@ -75,12 +73,13 @@ eksctl create iamserviceaccount \
 --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
 --approve
 
-
-helm upgrade --install external-dns external-dns/external-dns
-
 eksctl create iamserviceaccount \
 --cluster=$CLUSTER_NAME \
 --namespace=kube-system \
 --name=external-dns \
 --attach-policy-arn=$DNS_POLICY_ARN \
 --approve
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller --set clusterName=$CLUSTER_NAME -n kube-system --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
+helm upgrade --install external-dns external-dns/external-dns
+
