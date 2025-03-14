@@ -81,5 +81,7 @@ eksctl create iamserviceaccount \
 --approve
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller --set clusterName=$CLUSTER_NAME -n kube-system --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
-helm upgrade --install external-dns external-dns/external-dns
+helm upgrade --install external-dns external-dns/external-dns -n kube-system \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=external-dns
 
