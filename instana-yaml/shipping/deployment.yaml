@@ -6,7 +6,7 @@ metadata:
     project: instana
     tier: shipping-backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       tier: shipping-backend
