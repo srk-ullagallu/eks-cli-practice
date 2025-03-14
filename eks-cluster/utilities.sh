@@ -72,16 +72,6 @@ else
     fi
 fi
 
-
-package_installtion "Checking and adding Helm repository 'eks'..."
-if ! helm repo list | grep -q "eks"; then
-    helm repo add eks https://aws.github.io/eks-charts
-    helm repo update
-else
-    print_message "Helm repository 'eks' already exists."
-fi
-
-
 package_installtion "Installing or updating AWS Load Balancer Controller..."
 if helm list -n kube-system --filter "^aws-load-balancer-controller$" | grep -q "aws-load-balancer-controller"; then
     print_message "AWS Load Balancer Controller is already installed. Skipping."
@@ -106,10 +96,7 @@ else
         --approve
 fi
 
-
 print_message "Installing or upgrading ExternalDNS via Helm..."
-helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
-helm repo update
 helm upgrade --install external-dns external-dns/external-dns \
   --namespace kube-system \
   --set serviceAccount.name=external-dns \
