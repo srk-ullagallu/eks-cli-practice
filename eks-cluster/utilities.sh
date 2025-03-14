@@ -55,14 +55,23 @@ else
 fi
 
 package_installtion "Verifying Node Role existence..."
-NODE_ROLE_PREFIX=$(aws iam list-roles --query "Roles[?starts_with(RoleName, '$NODE_ROLE')].RoleName" --output text)
-if [ -z "$NODE_ROLE_PREFIX" ] || [ "$NODE_ROLE_PREFIX" == "None" ]; then
-    print_message "No IAM role found with name $NODE_ROLE. Exiting."
+
+# Fetch the exact role name dynamically
+NODE_ROLE=$(aws iam list-roles --query "Roles[?contains(RoleName, 'eksctl-eks-cli-prac-nodegroup-ng1-NodeInstanceRole')].RoleName" --output text)
+
+if [ -z "$NODE_ROLE" ] || [ "$NODE_ROLE" == "None" ]; then
+    print_message "No IAM role found matching the pattern. Exiting."
 else
-    print_message "Node Role found. Attaching policy..."
+    print_message "Node Role found: $NODE_ROLE. Attaching policy..."
     aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$EBS_CSI_POLICY_ARN"
-    print_message "Policy attached successfully."
+    
+    if [ $? -eq 0 ]; then
+        print_message "Policy attached successfully."
+    else
+        print_message "Failed to attach policy."
+    fi
 fi
+
 
 package_installtion "Checking and adding Helm repository 'eks'..."
 if ! helm repo list | grep -q "eks"; then
