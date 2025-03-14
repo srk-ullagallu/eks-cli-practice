@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 print_message() { echo "***** $1 *****"; }
 
 print_message "Defining required variables..."
