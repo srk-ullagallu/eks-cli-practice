@@ -1,5 +1,6 @@
 #!/bin/bash
-set -x
+
+
 print_message() { 
     echo  $1; }
 package_installtion() { 
