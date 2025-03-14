@@ -79,9 +79,9 @@ else
     eksctl create iamserviceaccount \
         --cluster=$CLUSTER_NAME \
         --namespace=kube-system \
+        --region=$REGION \
         --name=aws-load-balancer-controller \
         --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
-        --profile $PROFILE \
         --approve
 fi
 
@@ -102,10 +102,11 @@ if eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --name=external-dns --na
     print_message "IAM Service Account for ExternalDNS already exists. Skipping."
 else
     eksctl create iamserviceaccount \
-        --name external-dns \
-        --namespace kube-system \
-        --cluster $CLUSTER_NAME \
-        --attach-policy-arn $DNS_POLICY_ARN \
+        --name=external-dns \
+        --namespace=kube-system \
+        --region=$REGION \ 
+        --cluster=$CLUSTER_NAME \
+        --attach-policy-arn=$DNS_POLICY_ARN \
         --approve
 fi
 
