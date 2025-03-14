@@ -81,7 +81,7 @@ else
         --namespace=kube-system \
         --name=aws-load-balancer-controller \
         --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
-        --profile $PROFILE
+        --profile $PROFILE \
         --approve
 fi
 
