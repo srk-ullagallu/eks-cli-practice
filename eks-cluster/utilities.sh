@@ -2,10 +2,11 @@
 
 print_message() { 
     echo "--> $1"
+    echo -e "\e[32m--->$1-->\e[0m"
 }
 
 package_installation() { 
-    echo "*******$1******"
+    echo -e "\e[32m*******$1*******\e[0m"
 }
 
 package_installation "Defining required variables..."
@@ -17,6 +18,32 @@ DNS_POLICY_ARN="arn:aws:iam::522814728660:policy/ExternalDNSPolicy"
 REGION="ap-south-1"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 ECR_ARN="arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+
+
+package_installation Check if IAM aws-load-balancer-controller service accounts exist before creating them
+if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-system --name=aws-load-balancer-controller >/dev/null 2>&1; then
+  eksctl create iamserviceaccount \
+    --cluster=$CLUSTER_NAME \
+    --namespace=kube-system \
+    --name=aws-load-balancer-controller \
+    --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
+    --approve
+fi
+
+package_installation Install or upgrade AWS Load Balancer Controller only if not installed
+if ! helm status aws-load-balancer-controller -n kube-system >/dev/null 2>&1; then
+  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    --set clusterName=$CLUSTER_NAME \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=aws-load-balancer-controller \
+    -n kube-system
+else
+  helm upgrade aws-load-balancer-controller eks/aws-load-balancer-controller \
+    --set clusterName=$CLUSTER_NAME \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=aws-load-balancer-controller \
+    -n kube-system
+fi
 
 package_installation "Checking if Metrics Server is already installed..."
 if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
@@ -66,22 +93,28 @@ else
     print_message "Policys attached successfully."
 fi
 
-eksctl create iamserviceaccount \
---cluster=$CLUSTER_NAME \
---namespace=kube-system \
---name=aws-load-balancer-controller \
---attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
---approve
 
-eksctl create iamserviceaccount \
---cluster=$CLUSTER_NAME \
---namespace=kube-system \
---name=external-dns \
---attach-policy-arn=$DNS_POLICY_ARN \
---approve
+package_installation package_installation Check if IAM external-dns service accounts exist before creating them
+if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-system --name=external-dns >/dev/null 2>&1; then
+  eksctl create iamserviceaccount \
+    --cluster=$CLUSTER_NAME \
+    --namespace=kube-system \
+    --name=external-dns \
+    --attach-policy-arn=$DNS_POLICY_ARN \
+    --approve
+fi
 
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller --set clusterName=$CLUSTER_NAME -n kube-system --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
-helm upgrade --install external-dns external-dns/external-dns -n kube-system \
-  --set serviceAccount.create=false \
-  --set serviceAccount.name=external-dns
+package_installation Install or upgrade External DNS only if not installed
+if ! helm status external-dns -n kube-system >/dev/null 2>&1; then
+  helm install external-dns external-dns/external-dns \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=external-dns \
+    -n kube-system
+else
+  helm upgrade external-dns external-dns/external-dns \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=external-dns \
+    -n kube-system
+fi
+
 
