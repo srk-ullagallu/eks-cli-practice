@@ -1,3 +1,4 @@
+# Deployment
 env: dev
 name: frontend
 labels:
@@ -41,24 +42,28 @@ hpa:
         target:
           type: Utilization
           averageUtilization: 50
+
+# Service          
 service:
   port: 80
 
+# Ingress
 ingress:
   enabled: true
-
 alb:
   name: "ullagallu-konka"
   group: "ullagallu"
   scheme: "internet-facing"
   certificateArn: "arn:aws:acm:ap-south-1:522814728660:certificate/9bfb2029-8335-459b-9603-a814f500f774"
-
 dns:
   hostname: "expense-dev.bapatlas.site"
 
 
+# Secrets
 secrets:
   enabled: false
+
+# ConfigMap
 configmap:
   NGINX_CONF: |
     events {}

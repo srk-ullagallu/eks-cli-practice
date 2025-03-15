@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: frontend-config
+  name: dev-frontend
   labels:
     app: frontend
-    project: expense
+    tier: application
 data:
-  nginx.conf: |
+  NGINX_CONF: |
     events {}
 
     http {
@@ -34,7 +34,7 @@ data:
             }
 
             location /api/ {
-                proxy_pass http://backend:8080/;
+                proxy_pass http://dev-backend:8080/;
                 proxy_http_version 1.1;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;

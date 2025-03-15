@@ -1,39 +1,57 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: dev-frontend
   labels:
     app: frontend
-    project: expense
+    tier: application
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: frontend
-      project: expense
+      tier: application
   template:
     metadata:
       labels:
         app: frontend
-        project: expense
+        tier: application
     spec:
       containers:
-        - name: frontend
-          image: siva9666/expense-frontend:node
+        - name: dev-frontend
+          image: "siva9666/expense-frontend:node"
           ports:
             - containerPort: 80
           resources:
             requests:
-              memory: 500Mi
-              cpu: 100m
+              memory: 128Mi
+              cpu: 30m
             limits:
-              memory: 600Mi
-              cpu: 200m
+              memory: 256Mi
+              cpu: 60m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
           volumeMounts:
-            - name: nginx-config
+            - name: dev-frontend
               mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
+              subPath: NGINX_CONF
       volumes:
-        - name: nginx-config
+        - name: dev-frontend
           configMap:
-            name: frontend-config
+            name: dev-frontend
