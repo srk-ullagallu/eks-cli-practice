@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.env}}-{{ .Values.name}}
+  labels:
+    {{- toYaml .Values.labels | nindent 4 }}
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: siva9666/expense-mysql:v1
+        ports:
+        - containerPort: 3306
+        resources:
+            requests:
+              memory: 1Gi
+              cpu: 500m
+            limits:
+              memory: 2Gi
+              cpu: 800m
+        envFrom:
+          - secretRef:
+                name: mysql-secret
+        volumeMounts:
+        - name: expense
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: expense
+      labels:
+        app: mysql
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: expense
+      resources:
+        requests:
+          storage: 1Gi
+
+
+
+
+
+
+
+
+
+
+
+
+
