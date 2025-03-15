@@ -1,0 +1,56 @@
+env: dev
+name: backend
+labels:
+  app: backend
+  tier: application
+replicaCount: 1
+image:
+  repository: siva9666
+  name: expense-backend
+  tag: node
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "50m"
+  limits:
+    memory: "256Mi"
+    cpu: "75m"
+health_check:
+  path: /health
+probes:
+  enabled: true
+  liveness:
+    initialDelaySeconds: 10    
+    periodSeconds: 10            
+    timeoutSeconds: 2            
+    successThreshold: 1      
+    failureThreshold: 3 
+  readiness:
+    initialDelaySeconds: 10      
+    periodSeconds: 10           
+    timeoutSeconds: 2           
+    successThreshold: 1
+    failureThreshold: 3 
+
+configmap:
+  DB_HOST: expense-db
+  DB_DATABASE: transactions
+hpa:
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+service:
+  port: 8080
+
+secrets:
+  enabled: true
+  list:
+    - data:
+        DB_USER:  "expense"
+        DB_PASSWD: "ExpenseApp@1"
