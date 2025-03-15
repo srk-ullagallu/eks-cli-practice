@@ -37,6 +37,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: {{ .Values.env}}-{{ .Values.name}}
                 port:
                   number: 80
