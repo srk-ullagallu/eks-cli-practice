@@ -4,18 +4,18 @@ metadata:
   name: dev-frontend
   labels:
     app: frontend
-    tier: application
+    tier: web
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: frontend
-      tier: application
+      tier: web
   template:
     metadata:
       labels:
         app: frontend
-        tier: application
+        tier: web
     spec:
       containers:
         - name: dev-frontend
@@ -42,7 +42,7 @@ spec:
             httpGet:
               path: /health
               port: 80
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 2
             successThreshold: 1
