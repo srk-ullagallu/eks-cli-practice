@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: expense-db
+  labels:
+    type: db
+spec:
+  type: ExternalName
+  externalName: test-db.konkas.tech
