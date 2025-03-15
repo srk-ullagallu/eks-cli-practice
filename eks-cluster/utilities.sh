@@ -71,17 +71,22 @@ fi
 
 
 package_installation "Check if IAM aws-load-balancer-controller service account exists before creating it"
+
 if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-system --name=aws-load-balancer-controller | grep -q "aws-load-balancer-controller"; then
   print_message "Creating IAM Service Account for AWS Load Balancer Controller..."
-  eksctl create iamserviceaccount \
-    --cluster=$CLUSTER_NAME \
-    --namespace=kube-system \
-    --name=aws-load-balancer-controller \
-    --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
-    --approve
+  
+  if ! kubectl get sa aws-load-balancer-controller -n kube-system; then
+    eksctl create iamserviceaccount \
+      --cluster=$CLUSTER_NAME \
+      --namespace=kube-system \
+      --name=aws-load-balancer-controller \
+      --attach-policy-arn=$ALB_INGRESS_POLICY_ARN \
+      --approve
+  fi
 else
   print_message "IAM Service Account for AWS Load Balancer Controller already exists. Skipping creation."
 fi
+
 
 package_installation "Install or upgrade AWS Load Balancer Controller only if not installed"
 if ! helm status aws-load-balancer-controller -n kube-system >/dev/null 2>&1; then
@@ -98,15 +103,23 @@ else
     -n kube-system
 fi
 
-package_installation "package_installation Check if IAM external-dns service accounts exist before creating them"
+package_installation "Check if IAM external-dns service account exists before creating it"
+
 if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-system --name=external-dns | grep -q "external-dns"; then
-  eksctl create iamserviceaccount \
-    --cluster=$CLUSTER_NAME \
-    --namespace=kube-system \
-    --name=external-dns \
-    --attach-policy-arn=$DNS_POLICY_ARN \
-    --approve
+  print_message "Creating IAM Service Account for External DNS..."
+  
+  if ! kubectl get sa external-dns -n kube-system; then
+    eksctl create iamserviceaccount \
+      --cluster=$CLUSTER_NAME \
+      --namespace=kube-system \
+      --name=external-dns \
+      --attach-policy-arn=$DNS_POLICY_ARN \
+      --approve
+  fi
+else
+  print_message "IAM Service Account for External DNS already exists. Skipping creation."
 fi
+
 
 package_installation "Install or upgrade External DNS only if not installed"
 if ! helm status external-dns -n kube-system >/dev/null 2>&1; then
