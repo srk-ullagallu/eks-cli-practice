@@ -20,7 +20,7 @@ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 ECR_ARN="arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 
 
-package_installation Check if IAM aws-load-balancer-controller service accounts exist before creating them
+package_installation "Check if IAM aws-load-balancer-controller service accounts exist before creating them"
 if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-system --name=aws-load-balancer-controller >/dev/null 2>&1; then
   eksctl create iamserviceaccount \
     --cluster=$CLUSTER_NAME \
@@ -30,7 +30,21 @@ if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-syste
     --approve
 fi
 
-package_installation Install or upgrade AWS Load Balancer Controller only if not installed
+
+package_installation "Verifying Node Role existence..."
+NODE_ROLE=$(aws iam list-roles --query "Roles[?contains(RoleName, 'eksctl-eks-cli-prac-nodegroup-ng1-NodeInstanceRole')].RoleName" --output text)
+
+if [ -z "$NODE_ROLE" ] || [ "$NODE_ROLE" == "None" ]; then
+    print_message "No IAM role found matching the pattern. Exiting."
+    exit 1
+else
+    print_message "Node Role found: $NODE_ROLE. Attaching policy..."
+    aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$EBS_CSI_POLICY_ARN" || { print_message "Failed to attach policy"; exit 1; }
+    aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$ECR_ARN" || { print_message "Failed to attach policy"; exit 1; }
+    print_message "Policys attached successfully."
+fi
+
+package_installation "Install or upgrade AWS Load Balancer Controller only if not installed"
 if ! helm status aws-load-balancer-controller -n kube-system >/dev/null 2>&1; then
   helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
     --set clusterName=$CLUSTER_NAME \
@@ -94,7 +108,7 @@ else
 fi
 
 
-package_installation package_installation Check if IAM external-dns service accounts exist before creating them
+package_installation "package_installation Check if IAM external-dns service accounts exist before creating them"
 if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-system --name=external-dns >/dev/null 2>&1; then
   eksctl create iamserviceaccount \
     --cluster=$CLUSTER_NAME \
@@ -104,7 +118,7 @@ if ! eksctl get iamserviceaccount --cluster=$CLUSTER_NAME --namespace=kube-syste
     --approve
 fi
 
-package_installation Install or upgrade External DNS only if not installed
+package_installation "Install or upgrade External DNS only if not installed"
 if ! helm status external-dns -n kube-system >/dev/null 2>&1; then
   helm install external-dns external-dns/external-dns \
     --set serviceAccount.create=false \
