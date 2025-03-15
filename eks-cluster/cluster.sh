@@ -24,7 +24,8 @@ eksctl create cluster --name $CLUSTER_NAME \
                       --region $REGION \
                       --zones $ZONES \
                       --profile $PROFILE \
-                      --without-nodegroup
+                      --without-nodegroup \
+                      --version 1.32
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create EKS cluster." 
     exit 1
