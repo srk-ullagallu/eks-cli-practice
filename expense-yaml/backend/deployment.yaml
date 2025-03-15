@@ -1,36 +1,54 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: dev-backend
   labels:
     app: backend
-    project: expense
+    tier: application
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: backend
-      project: expense
+      tier: application
   template:
     metadata:
       labels:
         app: backend
-        project: expense
+        tier: application
     spec:
       containers:
-        - name: backend
-          image: siva9666/expense-backend:node
+        - name: dev-backend
+          image: "siva9666/expense-backend:node"
           ports:
             - containerPort: 8080
-          envFrom:
-            - configMapRef:
-                name: backend-config
-            - secretRef:
-                name: backend-secrets
           resources:
             requests:
-              memory: 500Mi
-              cpu: 100m
+              memory: 128Mi
+              cpu: 50m
             limits:
-              memory: 600Mi
-              cpu: 200m
+              memory: 256Mi
+              cpu: 75m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+          envFrom:
+            - configMapRef:
+                name: dev-backend
+            - secretRef:
+                name: dev-backend

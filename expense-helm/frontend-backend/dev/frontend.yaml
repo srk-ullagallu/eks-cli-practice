@@ -2,7 +2,7 @@ env: dev
 name: frontend
 labels:
   app: frontend
-  tier: application
+  tier: web
 replicaCount: 1
 image:
   repository: siva9666
@@ -26,7 +26,7 @@ probes:
     successThreshold: 1
     failureThreshold: 3
   readiness:
-    initialDelaySeconds: 5
+    initialDelaySeconds: 10
     periodSeconds: 10
     timeoutSeconds: 2
     successThreshold: 1
@@ -43,8 +43,20 @@ hpa:
           averageUtilization: 50
 service:
   port: 80
-  type: NodePort
-  nodePort: 32000
+
+ingress:
+  enabled: true
+
+alb:
+  name: "ullagallu-konka"
+  group: "ullagallu"
+  scheme: "internet-facing"
+  certificateArn: "arn:aws:acm:ap-south-1:522814728660:certificate/9bfb2029-8335-459b-9603-a814f500f774"
+
+dns:
+  hostname: "expense-dev.bapatlas.site"
+
+
 secrets:
   enabled: false
 configmap:

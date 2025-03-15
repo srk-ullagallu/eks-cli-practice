@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: backend-config
+  name: dev-backend
   labels:
     app: backend
-    project: expense
+    tier: application
 data:
-  DB_HOST: mysql
-  DB_DATABASE: transactions
+  DB_DATABASE: "transactions"
+  DB_HOST: "expense-db"
