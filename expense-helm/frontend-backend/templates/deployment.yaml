@@ -55,7 +55,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.env }}-{{ .Values.name }}
-            {{- if .Values.secrets.enabled }}
+            {{- if and .Values.secrets.enabled (eq .Values.name "backend") }}
             - secretRef:
                 name: {{ .Values.env }}-{{ .Values.name }}
             {{- end }}

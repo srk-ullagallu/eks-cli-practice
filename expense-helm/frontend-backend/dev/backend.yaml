@@ -51,9 +51,12 @@ service:
 ingress:
   enabled: false
 
+# secrets:
+#   enabled: false
+#   list:
+#     - data:
+#         DB_USER:  "expense"
+#         DB_PASSWD: "ExpenseApp@1"
+
 secrets:
-  enabled: false
-  list:
-    - data:
-        DB_USER:  "expense"
-        DB_PASSWD: "ExpenseApp@1"
+  enabled: true
