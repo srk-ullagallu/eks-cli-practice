@@ -48,9 +48,12 @@ hpa:
 service:
   port: 8080
 
-secrets:
-  enabled: true
-  list:
-    - data:
-        DB_USER:  "expense"
-        DB_PASSWD: "ExpenseApp@1"
+ingress:
+  enabled: false
+
+# secrets:
+#   enabled: true
+#   list:
+#     - data:
+#         DB_USER:  "expense"
+#         DB_PASSWD: "ExpenseApp@1"
