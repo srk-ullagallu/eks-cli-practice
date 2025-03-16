@@ -4,7 +4,7 @@ metadata:
   name: vault-token
   namespace: kube-system
 data:
-  token: kJiUIqzt38eczEOfUYjKv8B+VY0ZlKHeLRLh6esOKj4=
+  token: aHZzLkI0VWRTWEhXYUprd0pwelNQMGhLaE4zdA==
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore
