@@ -57,3 +57,6 @@ ingress:
 #     - data:
 #         DB_USER:  "expense"
 #         DB_PASSWD: "ExpenseApp@1"
+
+secrets:
+  enabled: false
