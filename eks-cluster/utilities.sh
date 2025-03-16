@@ -164,3 +164,5 @@ else
   helm upgrade external-secrets external-secrets/external-secrets -n kube-system
 fi
 
+package_installation "Apply the external seceret store"
+kubectl apply -f external-ss.yaml
