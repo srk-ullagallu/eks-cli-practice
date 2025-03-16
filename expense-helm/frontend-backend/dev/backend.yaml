@@ -59,4 +59,4 @@ ingress:
 #         DB_PASSWD: "ExpenseApp@1"
 
 secrets:
-  enabled: false
+  enabled: true
