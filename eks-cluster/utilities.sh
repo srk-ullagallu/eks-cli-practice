@@ -9,6 +9,20 @@ package_installation() {
     echo -e "\e[32m*******$1*******\e[0m"
 }
 
+
+check_and_add_repo() {
+    local repo_name=$1
+    local repo_url=$2
+
+    if helm repo list | awk '{print $1}' | grep -qw "$repo_name"; then
+        echo "Repo '$repo_name' already exists. Updating..."
+        helm repo update "$repo_name"
+    else
+        echo "Adding repo '$repo_name'..."
+        helm repo add "$repo_name" "$repo_url"
+    fi
+}
+
 package_installation "Defining required variables..."
 CLUSTER_NAME="eks-cli-prac"
 NODE_ROLE="eksctl-eks-cli-prac-nodegroup-ng1-NodeInstanceRole"
@@ -19,6 +33,16 @@ REGION="ap-south-1"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 ECR_ARN="arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 
+
+package_installation "Helm Charts Downloading...."
+
+check_and_add_repo "external-secrets" "https://charts.external-secrets.io"
+check_and_add_repo "eks" "https://aws.github.io/eks-charts"
+check_and_add_repo "external-dns" "https://kubernetes-sigs.github.io/external-dns/"
+check_and_add_repo "aws-ebs-csi-driver" "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+
+
+echo "Helm repositories are now up to date."
 
 package_installation "Checking if Metrics Server is already installed..."
 if ! kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
@@ -67,8 +91,6 @@ else
     aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$ECR_ARN" || { print_message "Failed to attach policy"; exit 1; }
     print_message "Policys attached successfully."
 fi
-
-
 
 package_installation "Check if IAM aws-load-balancer-controller service account exists before creating it"
 
@@ -134,4 +156,11 @@ else
     -n kube-system
 fi
 
+
+package_installation "Install or upgrade External Secrets Operator only if not installed"
+if ! helm status external-secrets -n kube-system >/dev/null 2>&1; then
+  helm install external-secrets external-secrets/external-secrets -n kube-system
+else
+  helm upgrade external-secrets external-secrets/external-secrets -n kube-system
+fi
 
