@@ -14,14 +14,7 @@ PROFILE="default"
 
 
 # Function to calculate elapsed time
-elapsed_time() {
-    local start=$1
-    local end=$2
-    local elapsed=$(( end - start ))
-    local minutes=$(( elapsed / 60 ))
-    local seconds=$(( elapsed % 60 ))
-    printf "Elapsed time: %d minutes and %d seconds\n" $minutes $seconds
-}
+
 
 # Start timer
 start_time=$(date +%s)
@@ -39,13 +32,3 @@ eksctl create nodegroup --cluster=$CLUSTER_NAME \
                        --ssh-public-key=$SSH_PUBLIC_KEY \
                        --profile $PROFILE \
                        --managed
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to create nodegroup."
-    exit 1
-fi
-
-# End timer
-end_time=$(date +%s)
-
-# Calculate and print elapsed time
-elapsed_time $start_time $end_time
