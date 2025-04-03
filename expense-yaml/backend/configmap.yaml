@@ -7,4 +7,4 @@ metadata:
     tier: application
 data:
   DB_DATABASE: "transactions"
-  DB_HOST: "expense-db"
+  DB_HOST: "mysql"
