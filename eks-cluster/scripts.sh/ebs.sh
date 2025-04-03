@@ -9,8 +9,8 @@ NODE_ROLE=$(aws iam list-roles --query "Roles[?contains(RoleName, 'eksctl-eks-cl
 if [ -z "$NODE_ROLE" ] || [ "$NODE_ROLE" == "None" ]; then
     echo  "No IAM role found matching the pattern. Exiting."
 else
-    print_message "Node Role found: $NODE_ROLE. Attaching policy..."
+    echo "Node Role found: $NODE_ROLE. Attaching policy..."
     aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$EBS_CSI_POLICY_ARN"
     aws iam attach-role-policy --role-name "$NODE_ROLE" --policy-arn "$ECR_POLICY_ARN"
-    print_message "Policys attached successfully."
+    echo "Policys attached successfully."
 fi
